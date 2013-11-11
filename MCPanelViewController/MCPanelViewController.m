@@ -11,6 +11,7 @@
 
 #import "UIImage+ImageEffects.h"
 
+#import <QuartzCore/QuartzCore.h>
 #import <objc/runtime.h>
 
 // constants
@@ -157,6 +158,14 @@ const static NSString *MCPanelViewGestureAnimationDirectionKey = @"MCPanelViewGe
 
 - (void)layoutSubviewsToWidth:(CGFloat)width {
     CGRect bounds = self.parentViewController.view.bounds;
+    
+    if (floor(NSFoundationVersionNumber) <= NSFoundationVersionNumber_iOS_6_1 && ![UIApplication sharedApplication].statusBarHidden ) {
+        // On iOS 6, with status bar visible, we need to manually shift the frame down to avoid it
+        CGRect statusBarFrame = [self.parentViewController.view convertRect:[UIApplication sharedApplication].statusBarFrame fromView:nil];
+        bounds.origin.y += statusBarFrame.size.height;
+        bounds.size.height -= statusBarFrame.size.height;
+    }
+    
     if (width > self.maxWidth) {
         CGFloat offset = 0;
         CGFloat shadowOffset = width - self.maxWidth;
@@ -171,17 +180,17 @@ const static NSString *MCPanelViewGestureAnimationDirectionKey = @"MCPanelViewGe
         self.backgroundButton.alpha = 1;
         self.imageView.frame = CGRectMake(offset, 0, width, self.maxHeight);
         self.shadowView.frame = CGRectMake(shadowOffset, 0, width, self.maxHeight);
-        self.rootViewController.view.frame = CGRectMake(offset, 0, width, self.maxHeight);
+        self.rootViewController.view.frame = CGRectMake(offset, bounds.origin.y, width, self.maxHeight);
     }
     else {
         CGFloat offset = 0;
         CGRect frame = CGRectZero;
         if (self.direction == MCPanelAnimationDirectionLeft) {
-            frame = CGRectMake(width-self.maxWidth, 0, self.maxWidth, self.maxHeight);
+            frame = CGRectMake(width-self.maxWidth, bounds.origin.y, self.maxWidth, self.maxHeight);
         }
         else {
             offset = CGRectGetWidth(bounds)-width;
-            frame = CGRectMake(CGRectGetWidth(bounds)-width, 0, self.maxWidth, self.maxHeight);
+            frame = CGRectMake(CGRectGetWidth(bounds)-width, bounds.origin.y, self.maxWidth, self.maxHeight);
         }
 
         self.backgroundButton.alpha = width / self.maxWidth;
@@ -196,7 +205,10 @@ const static NSString *MCPanelViewGestureAnimationDirectionKey = @"MCPanelViewGe
 
     CGRect bounds = controller.view.bounds;
     self.maxHeight = CGRectGetHeight(bounds);
-    self.maxWidth = self.rootViewController.preferredContentSize.width;
+    
+    if ( [self.rootViewController respondsToSelector:@selector(preferredContentSize)] ) {
+        self.maxWidth = self.rootViewController.preferredContentSize.width;
+    }
     if (self.maxWidth == 0) {
         self.maxWidth = 320;
     }
@@ -290,13 +302,22 @@ const static NSString *MCPanelViewGestureAnimationDirectionKey = @"MCPanelViewGe
 
     // get snapshot image
     UIGraphicsBeginImageContextWithOptions(rect.size, NO, 0.0);
-    [view drawViewHierarchyInRect:view.bounds afterScreenUpdates:YES];
+    CGContextRef ctx = UIGraphicsGetCurrentContext();
+    
+    if ( [view respondsToSelector:@selector(drawViewHierarchyInRect:afterScreenUpdates:)] ) {
+        [view drawViewHierarchyInRect:view.bounds afterScreenUpdates:YES];
+    } else {
+        [view.layer renderInContext:ctx];
+    }
     
     // try to extend image by reflecting
-    CGContextRef ctx = UIGraphicsGetCurrentContext();
     CGContextTranslateCTM(ctx, 0, 2*height);
     CGContextScaleCTM(ctx, 1, -1);
-    [view drawViewHierarchyInRect:view.bounds afterScreenUpdates:YES];
+    if ( [view respondsToSelector:@selector(drawViewHierarchyInRect:afterScreenUpdates:)] ) {
+        [view drawViewHierarchyInRect:view.bounds afterScreenUpdates:YES];
+    } else {
+        [view.layer renderInContext:ctx];
+    }
     
     UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
@@ -340,9 +361,9 @@ const static NSString *MCPanelViewGestureAnimationDirectionKey = @"MCPanelViewGe
 
 #pragma mark - Gestures
 
-- (void)handlePan:(UIPanGestureRecognizer *)pan {
+- (void)handlePan:(MCPanGestureRecognizer *)pan {
     // initialization for screen edge pan gesture
-    if ([pan isKindOfClass:[UIScreenEdgePanGestureRecognizer class]] &&
+    if (pan.edge != MCPanGestureRecognizerEdgeNone &&
         pan.state == UIGestureRecognizerStateBegan) {
         __weak UIViewController *controller = objc_getAssociatedObject(pan, &MCPanelViewGesturePresentingViewControllerKey);
         
@@ -394,7 +415,7 @@ const static NSString *MCPanelViewGestureAnimationDirectionKey = @"MCPanelViewGe
             CGFloat threshold = MCPanelViewGestureThreshold;
 
             // invert threshold if we started a screen edge pan gesture
-            if ([pan isKindOfClass:[UIScreenEdgePanGestureRecognizer class]]) {
+            if (pan.edge != MCPanGestureRecognizerEdgeNone) {
                 threshold = 1 - threshold;
             }
 
@@ -417,9 +438,9 @@ const static NSString *MCPanelViewGestureAnimationDirectionKey = @"MCPanelViewGe
     }
 }
 
-- (UIScreenEdgePanGestureRecognizer *)gestureRecognizerForScreenEdgeGestureInViewController:(UIViewController *)controller withDirection:(MCPanelAnimationDirection)direction {
-    UIScreenEdgePanGestureRecognizer *pan = [[UIScreenEdgePanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePan:)];
-    pan.edges = direction == MCPanelAnimationDirectionLeft ? UIRectEdgeLeft : UIRectEdgeRight;
+- (UIGestureRecognizer *)gestureRecognizerForScreenEdgeGestureInViewController:(UIViewController *)controller withDirection:(MCPanelAnimationDirection)direction {
+    MCPanGestureRecognizer *pan = [[MCPanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePan:)];
+    pan.edge = direction == MCPanelAnimationDirectionLeft ? MCPanGestureRecognizerEdgeLeft : MCPanGestureRecognizerEdgeRight;
 
     objc_setAssociatedObject(pan, &MCPanelViewGesturePresentingViewControllerKey,
                              controller, OBJC_ASSOCIATION_RETAIN);
@@ -433,7 +454,7 @@ const static NSString *MCPanelViewGestureAnimationDirectionKey = @"MCPanelViewGe
 
 - (void)removeGestureRecognizersForScreenEdgeGestureFromView:(UIView *)view {
     for (UIGestureRecognizer *recognizer in view.gestureRecognizers) {
-        if ([recognizer isKindOfClass:[UIScreenEdgePanGestureRecognizer class]]) {
+        if ([recognizer isKindOfClass:[MCPanGestureRecognizer class]] && ((MCPanGestureRecognizer*)recognizer).edge != MCPanGestureRecognizerEdgeNone) {
             __weak UIViewController *controller = objc_getAssociatedObject(recognizer, &MCPanelViewGesturePresentedViewControllerKey);
             if (controller == self) {
                 [view removeGestureRecognizer:recognizer];

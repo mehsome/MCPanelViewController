@@ -27,6 +27,7 @@
 		34A0D366180F9A4A00B25BB0 /* MCPanelViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 34A0D361180F9A4A00B25BB0 /* MCPanelViewController.m */; };
 		34A0D367180F9A4A00B25BB0 /* MCPanGestureRecognizer.m in Sources */ = {isa = PBXBuildFile; fileRef = 34A0D363180F9A4A00B25BB0 /* MCPanGestureRecognizer.m */; };
 		34A0D368180F9A4A00B25BB0 /* UIImage+ImageEffects.m in Sources */ = {isa = PBXBuildFile; fileRef = 34A0D365180F9A4A00B25BB0 /* UIImage+ImageEffects.m */; };
+		4C90240B1830BB89004F7832 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4C90240A1830BB89004F7832 /* Accelerate.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -69,6 +70,7 @@
 		34A0D363180F9A4A00B25BB0 /* MCPanGestureRecognizer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MCPanGestureRecognizer.m; sourceTree = "<group>"; };
 		34A0D364180F9A4A00B25BB0 /* UIImage+ImageEffects.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+ImageEffects.h"; sourceTree = "<group>"; };
 		34A0D365180F9A4A00B25BB0 /* UIImage+ImageEffects.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImage+ImageEffects.m"; sourceTree = "<group>"; };
+		4C90240A1830BB89004F7832 /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -79,6 +81,7 @@
 				3419394C17FD359600DAA33C /* CoreGraphics.framework in Frameworks */,
 				3419394E17FD359600DAA33C /* UIKit.framework in Frameworks */,
 				3419394A17FD359600DAA33C /* Foundation.framework in Frameworks */,
+				4C90240B1830BB89004F7832 /* Accelerate.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -118,6 +121,7 @@
 		3419394817FD359600DAA33C /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				4C90240A1830BB89004F7832 /* Accelerate.framework */,
 				3419394917FD359600DAA33C /* Foundation.framework */,
 				3419394B17FD359600DAA33C /* CoreGraphics.framework */,
 				3419394D17FD359600DAA33C /* UIKit.framework */,
@@ -354,7 +358,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_INCLUDING_64_BIT)";
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
@@ -383,7 +387,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = 2;
@@ -394,7 +398,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_INCLUDING_64_BIT)";
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
@@ -417,7 +421,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = 2;
 				VALIDATE_PRODUCT = YES;

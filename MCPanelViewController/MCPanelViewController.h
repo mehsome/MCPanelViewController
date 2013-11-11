@@ -32,7 +32,7 @@ typedef NS_ENUM(NSInteger, MCPanelBackgroundStyle) {
 - (void)presentInViewController:(UIViewController *)controller withDirection:(MCPanelAnimationDirection)direction;
 - (void)dismiss;
 
-- (UIScreenEdgePanGestureRecognizer *)gestureRecognizerForScreenEdgeGestureInViewController:(UIViewController *)controller withDirection:(MCPanelAnimationDirection)direction;
+- (UIGestureRecognizer *)gestureRecognizerForScreenEdgeGestureInViewController:(UIViewController *)controller withDirection:(MCPanelAnimationDirection)direction;
 - (void)removeGestureRecognizersForScreenEdgeGestureFromView:(UIView *)view;
 
 @end
