@@ -17,6 +17,7 @@
 // constants
 const static CGFloat MCPanelViewAnimationDuration = 0.3;
 const static CGFloat MCPanelViewGestureThreshold = 0.6;
+const static CGFloat MCPanelViewElasticity = 0.2;
 const static CGFloat MCPanelViewUndersampling = 8;
 
 // associative references on UIScreenEdgePanGestureRecognizer to remember some information we need later
@@ -174,6 +175,9 @@ const static NSString *MCPanelViewGestureAnimationDirectionKey = @"MCPanelViewGe
     }
     
     if (width > self.maxWidth) {
+        CGFloat extra = width - self.maxWidth;
+        width = self.maxWidth + extra * (1.0 / ((extra / (self.maxWidth * MCPanelViewElasticity)) + 1)) * 2.0;
+        
         CGFloat offset = 0;
         CGFloat shadowOffset = width - self.maxWidth;
 
