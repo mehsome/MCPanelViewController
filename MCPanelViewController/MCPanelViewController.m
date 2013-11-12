@@ -225,7 +225,8 @@ const static NSString *MCPanelViewGestureAnimationDirectionKey = @"MCPanelViewGe
         self.maxWidth = self.rootViewController.preferredContentSize.width;
     }
     if (self.maxWidth == 0) {
-        self.maxWidth = 320;
+        BOOL isiPad = [[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad;
+        self.maxWidth = isiPad ? 320 : 260;
     }
 
     [self.rootViewController addToParentViewController:self inView:self.view callingAppearanceMethods:YES];
