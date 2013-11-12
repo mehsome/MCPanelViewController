@@ -17,6 +17,7 @@
 // constants
 const static CGFloat MCPanelViewAnimationDuration = 0.3;
 const static CGFloat MCPanelViewGestureThreshold = 0.6;
+const static CGFloat MCPanelViewUndersampling = 8;
 
 // associative references on UIScreenEdgePanGestureRecognizer to remember some information we need later
 const static NSString *MCPanelViewGesturePresentingViewControllerKey = @"MCPanelViewGesturePresentingViewControllerKey";
@@ -68,6 +69,7 @@ const static NSString *MCPanelViewGestureAnimationDirectionKey = @"MCPanelViewGe
 @property (assign, nonatomic) CGFloat maxHeight;
 
 @property (strong, nonatomic) UIView *shadowView;
+@property (strong, nonatomic) UIView *imageViewContainer;
 @property (strong, nonatomic) UIImageView *imageView;
 @property (strong, nonatomic) UIButton *backgroundButton;
 @property (strong, nonatomic) MCPanGestureRecognizer *panGestureRecognizer;
@@ -119,8 +121,13 @@ const static NSString *MCPanelViewGestureAnimationDirectionKey = @"MCPanelViewGe
     self.imageView = [[UIImageView alloc] init];
     self.imageView.clipsToBounds = YES;
     
+    self.imageViewContainer = [[UIView alloc] init];
+    self.imageViewContainer.clipsToBounds = YES;
+    self.imageViewContainer.backgroundColor = [UIColor clearColor];
+    [self.imageViewContainer addSubview:self.imageView];
+    
     [self.view addSubview:self.shadowView];
-    [self.view addSubview:self.imageView];
+    [self.view addSubview:self.imageViewContainer];
   
     [self setPanningEnabled:YES];
 }
@@ -178,7 +185,9 @@ const static NSString *MCPanelViewGestureAnimationDirectionKey = @"MCPanelViewGe
         }
 
         self.backgroundButton.alpha = 1;
-        self.imageView.frame = CGRectMake(offset, 0, width, self.maxHeight);
+        self.imageViewContainer.frame = CGRectMake(offset, 0, width, self.maxHeight);
+        self.imageView.frame = CGRectMake(_direction == MCPanelAnimationDirectionLeft ? 0 : _imageViewContainer.bounds.size.width - bounds.size.width, 0,
+                                          self.imageView.image.size.width * MCPanelViewUndersampling, self.imageView.image.size.height * MCPanelViewUndersampling);
         self.shadowView.frame = CGRectMake(shadowOffset, 0, width, self.maxHeight);
         self.rootViewController.view.frame = CGRectMake(offset, bounds.origin.y, width, self.maxHeight);
     }
@@ -194,7 +203,9 @@ const static NSString *MCPanelViewGestureAnimationDirectionKey = @"MCPanelViewGe
         }
 
         self.backgroundButton.alpha = width / self.maxWidth;
-        self.imageView.frame = CGRectMake(offset, 0, width, self.maxHeight);
+        self.imageViewContainer.frame = CGRectMake(offset, 0, width, self.maxHeight);
+        self.imageView.frame = CGRectMake(_direction == MCPanelAnimationDirectionLeft ? 0 : _imageViewContainer.bounds.size.width - bounds.size.width, 0,
+                                          self.imageView.image.size.width * MCPanelViewUndersampling, self.imageView.image.size.height * MCPanelViewUndersampling);
         self.shadowView.frame = frame;
         self.rootViewController.view.frame = frame;
     }
@@ -234,12 +245,11 @@ const static NSString *MCPanelViewGestureAnimationDirectionKey = @"MCPanelViewGe
     }
     
     self.rootViewController.view.autoresizingMask = mask;
-    self.imageView.autoresizingMask = mask;
+    self.imageViewContainer.autoresizingMask = mask;
     self.shadowView.autoresizingMask = mask;
     [self addToParentViewController:controller inView:controller.view callingAppearanceMethods:YES];
 
     [self refreshBackgroundAnimated:NO];
-    self.imageView.contentMode = direction;
     self.shadowView.layer.shadowPath = [UIBezierPath bezierPathWithRect:CGRectMake(0, 0, self.maxWidth, self.maxHeight)].CGPath;
 }
 
@@ -299,10 +309,13 @@ const static NSString *MCPanelViewGestureAnimationDirectionKey = @"MCPanelViewGe
     CGFloat height = CGRectGetHeight(view.bounds);
     CGFloat dimension = MAX(width, height);
     CGRect rect = CGRectMake(0, 0, width, dimension);
+    CGRect undersampledRect = CGRectApplyAffineTransform(rect, CGAffineTransformMakeScale(1/MCPanelViewUndersampling, 1/MCPanelViewUndersampling));
 
     // get snapshot image
-    UIGraphicsBeginImageContextWithOptions(rect.size, NO, 0.0);
+    UIGraphicsBeginImageContextWithOptions(undersampledRect.size, NO, 0.0);
     CGContextRef ctx = UIGraphicsGetCurrentContext();
+    
+    CGContextScaleCTM(ctx, 1/MCPanelViewUndersampling, 1/MCPanelViewUndersampling);
     
     if ( [view respondsToSelector:@selector(drawViewHierarchyInRect:afterScreenUpdates:)] ) {
         [view drawViewHierarchyInRect:view.bounds afterScreenUpdates:YES];
@@ -310,13 +323,13 @@ const static NSString *MCPanelViewGestureAnimationDirectionKey = @"MCPanelViewGe
         [view.layer renderInContext:ctx];
     }
     
-    // try to extend image by reflecting
-    CGContextTranslateCTM(ctx, 0, 2*height);
-    CGContextScaleCTM(ctx, 1, -1);
-    if ( [view respondsToSelector:@selector(drawViewHierarchyInRect:afterScreenUpdates:)] ) {
-        [view drawViewHierarchyInRect:view.bounds afterScreenUpdates:YES];
-    } else {
-        [view.layer renderInContext:ctx];
+    if ( rect.size.height > height ) {
+        // try to extend image by reflecting
+        CGContextTranslateCTM(ctx, 0, 2*height);
+        CGContextScaleCTM(ctx, 1, -1);
+        UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
+        CGContextClipToRect(ctx, view.bounds);
+        [image drawInRect:CGRectMake(0, 0, rect.size.width, rect.size.height)];
     }
     
     UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
@@ -324,19 +337,19 @@ const static NSString *MCPanelViewGestureAnimationDirectionKey = @"MCPanelViewGe
 
     switch (self.backgroundStyle) {
         case MCPanelBackgroundStyleExtraLight:
-            image = [image applyExtraLightEffect];
+            image = [image applyExtraLightEffectWithRadius:20/MCPanelViewUndersampling];
             break;
 
         case MCPanelBackgroundStyleDark:
-            image = [image applyDarkEffect];
+            image = [image applyDarkEffectWithRadius:20/MCPanelViewUndersampling];
             break;
 
         case MCPanelBackgroundStyleTinted:
-            image = [image applyTintEffectWithColor:self.tintColor];
+            image = [image applyTintEffectWithColor:self.tintColor radius:10/MCPanelViewUndersampling];
             break;
 
         default:
-            image = [image applyLightEffect];
+            image = [image applyLightEffectWithRadius:20/MCPanelViewUndersampling];
             break;
     }
     
@@ -352,10 +365,14 @@ const static NSString *MCPanelViewGestureAnimationDirectionKey = @"MCPanelViewGe
                         animations:^{
                             typeof(self) strongSelf = weakSelf;
                             strongSelf.imageView.image = image;
+                            strongSelf.imageView.frame = CGRectMake(_direction == MCPanelAnimationDirectionLeft ? 0 : _imageViewContainer.bounds.size.width - width, 0,
+                                                                    image.size.width * MCPanelViewUndersampling, image.size.height * MCPanelViewUndersampling);
                         } completion:nil];
     }
     else {
         self.imageView.image = image;
+        self.imageView.frame = CGRectMake(_direction == MCPanelAnimationDirectionLeft ? 0 : _imageViewContainer.bounds.size.width - width, 0,
+                                          image.size.width * MCPanelViewUndersampling, image.size.height * MCPanelViewUndersampling);
     }
 }
 
