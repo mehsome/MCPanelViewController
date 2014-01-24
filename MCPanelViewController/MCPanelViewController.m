@@ -107,6 +107,7 @@ const static NSString *MCPanelViewGestureAnimationDirectionKey = @"MCPanelViewGe
     self.view.autoresizingMask = fullScreenMask;
     
     self.backgroundButton = [[UIButton alloc] init];
+    self.backgroundButton.accessibilityLabel = NSLocalizedString(@"Close panel", @"");
     self.backgroundButton.autoresizingMask = fullScreenMask;
     [self.backgroundButton addTarget:self action:@selector(dismiss) forControlEvents:UIControlEventTouchUpInside];
     self.masking = YES;    
