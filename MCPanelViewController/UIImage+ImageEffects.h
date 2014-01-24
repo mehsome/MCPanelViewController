@@ -93,14 +93,14 @@
  5/3/2013
  */
 
-@import UIKit;
+#import <UIKit/UIKit.h>
 
 @interface UIImage (ImageEffects)
 
-- (UIImage *)applyLightEffect;
-- (UIImage *)applyExtraLightEffect;
-- (UIImage *)applyDarkEffect;
-- (UIImage *)applyTintEffectWithColor:(UIColor *)tintColor;
+- (UIImage *)applyLightEffectWithRadius:(CGFloat)radius;
+- (UIImage *)applyExtraLightEffectWithRadius:(CGFloat)radius;
+- (UIImage *)applyDarkEffectWithRadius:(CGFloat)radius;
+- (UIImage *)applyTintEffectWithColor:(UIColor *)tintColor radius:(CGFloat)radius;
 
 - (UIImage *)applyBlurWithRadius:(CGFloat)blurRadius tintColor:(UIColor *)tintColor saturationDeltaFactor:(CGFloat)saturationDeltaFactor maskImage:(UIImage *)maskImage;
 

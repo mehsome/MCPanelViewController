@@ -14,9 +14,16 @@ typedef NS_ENUM(NSInteger, MCPanGestureRecognizerDirection) {
     MCPanGestureRecognizerDirectionVertical
 };
 
+typedef NS_ENUM(NSInteger, MCPanGestureRecognizerEdge) {
+    MCPanGestureRecognizerEdgeNone = 0,
+    MCPanGestureRecognizerEdgeLeft,
+    MCPanGestureRecognizerEdgeRight
+};
+
 @interface MCPanGestureRecognizer : UIPanGestureRecognizer
 
 @property (assign, nonatomic) MCPanGestureRecognizerDirection direction;
+@property (assign, nonatomic) MCPanGestureRecognizerEdge edge;
 
 @end
 
