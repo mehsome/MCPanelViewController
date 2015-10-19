@@ -101,29 +101,56 @@
 
 @implementation UIImage (ImageEffects)
 
+#pragma mark - effect method with default value for predifined blur radius
 
 - (UIImage *)applyLightEffect
 {
-    UIColor *tintColor = [UIColor colorWithWhite:1.0 alpha:0.3];
-    return [self applyBlurWithRadius:30 tintColor:tintColor saturationDeltaFactor:1.8 maskImage:nil];
+    return [self applyLightEffectWithBlurRadius:30];
 }
 
 
 - (UIImage *)applyExtraLightEffect
 {
-    UIColor *tintColor = [UIColor colorWithWhite:0.97 alpha:0.82];
-    return [self applyBlurWithRadius:20 tintColor:tintColor saturationDeltaFactor:1.8 maskImage:nil];
+    return [self applyExtraLightEffectWithBlurRadius:20];
 }
 
 
 - (UIImage *)applyDarkEffect
 {
-    UIColor *tintColor = [UIColor colorWithWhite:0.11 alpha:0.73];
-    return [self applyBlurWithRadius:20 tintColor:tintColor saturationDeltaFactor:1.8 maskImage:nil];
+    return [self applyDarkEffectWithBlurRadius:20];
 }
 
 
 - (UIImage *)applyTintEffectWithColor:(UIColor *)tintColor
+{
+    return [self applyTintEffectWithColor:tintColor blurRadius:10];
+}
+
+
+#pragma mark - effect method with custom blur radius
+
+
+- (UIImage *)applyLightEffectWithBlurRadius:(CGFloat)blurRadius
+{
+    UIColor *tintColor = [UIColor colorWithWhite:1.0 alpha:0.3];
+    return [self applyBlurWithRadius:blurRadius tintColor:tintColor saturationDeltaFactor:1.8 maskImage:nil];
+}
+
+- (UIImage *)applyExtraLightEffectWithBlurRadius:(CGFloat)blurRadius
+{
+    UIColor *tintColor = [UIColor colorWithWhite:0.97 alpha:0.82];
+    return [self applyBlurWithRadius:blurRadius tintColor:tintColor saturationDeltaFactor:1.8 maskImage:nil];
+}
+
+
+- (UIImage *)applyDarkEffectWithBlurRadius:(CGFloat)blurRadius
+{
+    UIColor *tintColor = [UIColor colorWithWhite:0.11 alpha:0.73];
+    return [self applyBlurWithRadius:blurRadius tintColor:tintColor saturationDeltaFactor:1.8 maskImage:nil];
+}
+
+
+- (UIImage *)applyTintEffectWithColor:(UIColor *)tintColor blurRadius:(CGFloat)blurRadius
 {
     const CGFloat EffectColorAlpha = 0.6;
     UIColor *effectColor = tintColor;
@@ -140,7 +167,7 @@
             effectColor = [UIColor colorWithRed:r green:g blue:b alpha:EffectColorAlpha];
         }
     }
-    return [self applyBlurWithRadius:10 tintColor:effectColor saturationDeltaFactor:-1.0 maskImage:nil];
+    return [self applyBlurWithRadius:blurRadius tintColor:effectColor saturationDeltaFactor:-1.0 maskImage:nil];
 }
 
 

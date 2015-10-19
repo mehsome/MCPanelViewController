@@ -17,7 +17,11 @@ typedef NS_ENUM(NSInteger, MCPanelBackgroundStyle) {
     MCPanelBackgroundStyleLight = 0,
     MCPanelBackgroundStyleExtraLight,
     MCPanelBackgroundStyleDark,
-    MCPanelBackgroundStyleTinted
+    MCPanelBackgroundStyleTinted,
+    MCPanelBackgroundStyleLightCustomBlurRadius,
+    MCPanelBackgroundStyleExtraLightCustomBlurRadius,
+    MCPanelBackgroundStyleDarkCustomBlurRadius,
+    MCPanelBackgroundStyleTintedCustomBlurRadius
 };
 
 @class MCPanelViewController;
@@ -38,6 +42,7 @@ typedef NS_ENUM(NSInteger, MCPanelBackgroundStyle) {
 @property (assign, nonatomic) CGFloat shadowOpacity;
 @property (assign, nonatomic) CGFloat shadowRadius;
 @property (assign, nonatomic) MCPanelBackgroundStyle backgroundStyle;
+@property (assign, nonatomic) CGFloat blurRadius; // use to customize the blur radius of the MCPanel
 @property (assign, nonatomic, getter = isMasking) BOOL masking;
 @property (assign, nonatomic, getter = isPanningEnabled) BOOL panningEnabled;
 @property (weak, nonatomic) id<MCPanelViewControllerDelegate> delegate;
