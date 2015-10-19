@@ -86,6 +86,7 @@ const static NSString *MCPanelViewGestureAnimationDirectionKey = @"MCPanelViewGe
 		self.tintColor = [UIColor colorWithWhite:1.0 alpha:0.3];
 		self.maskColor = [UIColor colorWithWhite:0 alpha:0.5];
 		self.shadowColor = [UIColor blackColor];
+        self.blurRadius = 0;
 		self.shadowOpacity = 0.3;
 		self.shadowRadius = 5;
 		self.rootViewController = controller;
@@ -361,6 +362,22 @@ const static NSString *MCPanelViewGestureAnimationDirectionKey = @"MCPanelViewGe
 		case MCPanelBackgroundStyleTinted:
 			image = [image applyTintEffectWithColor:self.tintColor];
 			break;
+            
+        case MCPanelBackgroundStyleLightCustomBlurRadius:
+            image = [image applyLightEffectWithBlurRadius:self.blurRadius];
+            break;
+            
+        case MCPanelBackgroundStyleExtraLightCustomBlurRadius:
+            image = [image applyExtraLightEffectWithBlurRadius:self.blurRadius];
+            break;
+            
+        case MCPanelBackgroundStyleDarkCustomBlurRadius:
+            image = [image applyDarkEffectWithBlurRadius:self.blurRadius];
+            break;
+            
+        case MCPanelBackgroundStyleTintedCustomBlurRadius:
+            image = [image applyTintEffectWithColor:self.tintColor blurRadius:self.blurRadius];
+            break;
 
 		default:
 			image = [image applyLightEffect];

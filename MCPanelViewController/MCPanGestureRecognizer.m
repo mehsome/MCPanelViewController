@@ -26,11 +26,11 @@ const static CGFloat MCPanGestureRecognizerThreshold = 4;
     _translationY += prevPoint.y - nowPoint.y;
     if (!_isDragging) {
         if (_direction == MCPanGestureRecognizerDirectionHorizontal &&
-            abs(_translationY) > MCPanGestureRecognizerThreshold) {
+            fabs(_translationY) > MCPanGestureRecognizerThreshold) {
             self.state = UIGestureRecognizerStateFailed;
         }
         if (_direction == MCPanGestureRecognizerDirectionVertical &&
-                 abs(_translationX) > MCPanGestureRecognizerThreshold) {
+                 fabs(_translationX) > MCPanGestureRecognizerThreshold) {
             self.state = UIGestureRecognizerStateFailed;
         }
         _isDragging = YES;
